@@ -58,7 +58,7 @@ AgroBased is a revolutionary platform that leverages blockchain technology to ad
 
 2. Navigate to the project directory:
    ```
-   cd agrobased
+   cd app
    ```
 
 3. Install dependencies:
@@ -69,8 +69,8 @@ AgroBased is a revolutionary platform that leverages blockchain technology to ad
 4. Create a `.env` file in the root directory and add the following variables:
    ```
    NEXT_PUBLIC_PRIVY_APP_ID=""
-  NEXT_PUBLIC_PINATA_JWT=""
-  NEXT_PUBLIC_PINATA_GATEWAY=" "
+   NEXT_PUBLIC_PINATA_JWT=""
+   NEXT_PUBLIC_PINATA_GATEWAY=""
    ```
 
 ## Running the Project Locally
