@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useAccount, useInfiniteReadContracts } from "wagmi";
 import { isAddressEqual, zeroAddress } from "viem";
 import { farmTokenAbi } from "@/contracts/abi/farmToken";
+import { Abi } from "viem";
 
 const LIMIT = 42;
 
@@ -14,24 +15,19 @@ export function TokenInvestmentsList(props: {
   contracts: SiteConfigContracts;
 }) {
   const { address } = useAccount();
-  const [smartAccountAddress, setSmartAccountAddress] = useState<
-    `0x${string}` | undefined
-  >();
+  const [smartAccountAddress, setSmartAccountAddress] = useState<`0x${string}` | undefined>();
   const [tokens, setTokens] = useState<string[] | undefined>();
 
   const { data } = useInfiniteReadContracts({
     cacheKey: `token_investments_list_${props.contracts.chain.id.toString()}`,
-    contracts(pageParam) {
-      return [...new Array(LIMIT)].map(
-        (_, i) =>
-          ({
-            address: props.contracts.farmToken,
-            abi: farmTokenAbi,
-            functionName: "getParams",
-            args: [BigInt(pageParam + i)],
-            chainId: props.contracts.chain.id,
-          } as const)
-      );
+    contracts(pageParam: number) {
+      return [...Array(LIMIT)].map((_, i) => ({
+        address: props.contracts.farmToken,
+        abi: farmTokenAbi as Abi,
+        functionName: "getParams",
+        args: [BigInt(pageParam + i)],
+        chainId: props.contracts.chain.id,
+      }));
     },
     query: {
       initialPageParam: 0,

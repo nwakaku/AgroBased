@@ -272,7 +272,7 @@ export function TokenCardHeader(props: TokenCardHeaderProps): JSX.Element {
           {isReturnButtonVisible && (
             <TokenReturnInvestmentDialog
               token={props.token}
-              tokenInvestmentTokenSymbol={props.tokenInvestmentTokenSymbol}
+              // tokenInvestmentTokenSymbol={props.tokenInvestmentTokenSymbol}
               contracts={props.contracts}
               onReturn={() => props.onUpdate()}
             />
@@ -281,7 +281,7 @@ export function TokenCardHeader(props: TokenCardHeaderProps): JSX.Element {
             <TokenInvestDialog
               token={props.token}
               tokenInvestmentAmount={props.tokenInvestmentAmount}
-              tokenInvestmentTokenSymbol={props.tokenInvestmentTokenSymbol}
+              // tokenInvestmentTokenSymbol={props.tokenInvestmentTokenSymbol}
               contracts={props.contracts}
               onInvest={() => props.onUpdate()}
             />

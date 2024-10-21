@@ -10,6 +10,7 @@ import { useReadContract, useReadContracts } from "wagmi";
 import { Skeleton } from "./ui/skeleton";
 import { farmTokenAbi } from "@/contracts/abi/farmToken";
 import { FarmTokenMetadata } from "@/types/farm-token-metadata";
+import { Abi } from "viem";
 
 const NATIVE_TOKEN_SYMBOL = "ETH";
 const DEFAULT_REPUTATION_SCORE = 50;
@@ -19,28 +20,51 @@ interface TokenCardProps {
   contracts: SiteConfigContracts;
 }
 
+interface TokenParams {
+  investmentAmount: bigint;
+  investor: `0x${string}`;
+  returnAmount: bigint;
+  returnDate: bigint;
+}
+
+// The actual return type from useMetadataLoader
+interface MetadataLoaderResponse {
+  data: FarmTokenMetadata | undefined;
+  isLoaded: boolean;  // Note: isLoaded not isLoading
+}
+
+type WagmiContractCall = {
+  abi?: Abi | undefined;
+  functionName?: string | undefined;
+  args?: readonly unknown[] | undefined;
+  address?: `0x${string}` | undefined;
+  chainId?: number | undefined;
+};
+
+
 export function TokenCard({ token, contracts }: TokenCardProps): JSX.Element {
   const contractCalls = useMemo(
-    () => [
-      {
-        address: contracts.farmToken,
-        abi: farmTokenAbi,
-        functionName: "ownerOf",
-        args: [BigInt(token)],
-      },
-      {
-        address: contracts.farmToken,
-        abi: farmTokenAbi,
-        functionName: "getParams",
-        args: [BigInt(token)],
-      },
-      {
-        address: contracts.farmToken,
-        abi: farmTokenAbi,
-        functionName: "tokenURI",
-        args: [BigInt(token)],
-      },
-    ],
+    () =>
+      [
+        {
+          address: contracts.farmToken,
+          abi: farmTokenAbi as Abi,
+          functionName: "ownerOf",
+          args: [BigInt(token)],
+        },
+        {
+          address: contracts.farmToken,
+          abi: farmTokenAbi as Abi,
+          functionName: "getParams",
+          args: [BigInt(token)],
+        },
+        {
+          address: contracts.farmToken,
+          abi: farmTokenAbi as Abi,
+          functionName: "tokenURI",
+          args: [BigInt(token)],
+        },
+      ] satisfies WagmiContractCall[],
     [token, contracts.farmToken]
   );
 
@@ -55,15 +79,19 @@ export function TokenCard({ token, contracts }: TokenCardProps): JSX.Element {
     abi: farmTokenAbi,
     functionName: "calculateReputationScore",
     args: [tokenOwner?.result as `0x${string}`],
-    enabled: Boolean(tokenOwner?.result),
+    query: {
+      enabled: Boolean(tokenOwner?.result),
+    },
   });
 
-  const { data: tokenMetadata, isLoading: isTokenMetadataLoading } =
-    useMetadataLoader<FarmTokenMetadata>(tokenMetadataUri?.result);
+  const { data: tokenMetadata} =
+    useMetadataLoader<FarmTokenMetadata>(
+      tokenMetadataUri?.result as string | undefined
+    ) as MetadataLoaderResponse;
 
   console.log(tokenMetadata);
 
-  if (isLoading || isTokenMetadataLoading) {
+  if (isLoading) {
     return <Skeleton className="w-full h-8" />;
   }
 
@@ -77,7 +105,7 @@ export function TokenCard({ token, contracts }: TokenCardProps): JSX.Element {
   }
 
   const { investmentAmount, investor, returnAmount, returnDate } =
-    tokenParams.result;
+    tokenParams.result as TokenParams;
   const finalReputationScore = Number(
     reputationScore ?? DEFAULT_REPUTATION_SCORE
   );
@@ -87,7 +115,7 @@ export function TokenCard({ token, contracts }: TokenCardProps): JSX.Element {
       <TokenCardHeader
         token={token}
         tokenMetadata={tokenMetadata}
-        tokenOwner={tokenOwner.result}
+        tokenOwner={tokenOwner.result as `0x${string}`}
         tokenInvestmentAmount={investmentAmount.toString()}
         tokenInvestmentTokenSymbol={NATIVE_TOKEN_SYMBOL}
         tokenInvestor={investor}
@@ -101,7 +129,7 @@ export function TokenCard({ token, contracts }: TokenCardProps): JSX.Element {
       <TokenCardRecords
         token={token}
         tokenMetadata={tokenMetadata}
-        tokenOwner={tokenOwner.result}
+        tokenOwner={tokenOwner.result as `0x${string}`}
         tokenInvestmentTokenSymbol={NATIVE_TOKEN_SYMBOL}
         tokenReturnDate={returnDate.toString()}
         contracts={contracts}

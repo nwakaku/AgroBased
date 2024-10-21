@@ -5,8 +5,17 @@ import EntityList from "./entity-list";
 import { TokenCard } from "./token-card";
 import { farmTokenAbi } from "@/contracts/abi/farmToken";
 import { SiteConfigContracts } from "@/config/site";
+import { Abi } from "viem";
 
 const LIMIT = 42;
+
+type WagmiContractCall = {
+  abi?: Abi | undefined;
+  functionName?: string | undefined;
+  args?: readonly unknown[] | undefined;
+  address?: `0x${string}` | undefined;
+  chainId?: number | undefined;
+};
 
 export function TokenFarmList({
   contracts,
@@ -33,10 +42,10 @@ export function TokenFarmList({
     () =>
       [...Array(LIMIT)].map((_, i) => ({
         address: contracts.farmToken,
-        abi: farmTokenAbi,
+        abi: farmTokenAbi as Abi,
         functionName: "ownerOf",
         args: [BigInt(i)],
-      })),
+      })) satisfies WagmiContractCall[],
     [contracts.farmToken]
   );
 
